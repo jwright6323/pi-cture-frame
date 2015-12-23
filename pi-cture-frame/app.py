@@ -15,7 +15,9 @@ class Application(tk.Frame):
     root.title('Pi-cture Frame')
     tk.Frame.__init__(self, root)
     self.grid()
-    im = ImageTk.PhotoImage(Image.open("/tmp/pi-cture-frame/23622236440.jpg").crop((0,0,1024,800)))
+    pilim = Image.open("/tmp/pi-cture-frame/23622236440.jpg")
+    pilim.thumbnail((1024,800))
+    im = ImageTk.PhotoImage(pilim)
     panel = tk.Label(root, image = im)
     panel.image = im
     panel.pack(side = "bottom", fill="both", expand="yes")
