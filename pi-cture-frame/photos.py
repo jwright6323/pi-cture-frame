@@ -24,6 +24,7 @@ except OSError as e:
   else: raise
 
 def get_photo(attrs):
+  print attrs
   urllib.urlretrieve('http://farm%(farm)s.staticflickr.com/%(server)s/%(id)s_%(originalsecret)s_o.jpg' % attrs,filename=PHOTO_DIR + '/' + attrs['id'] + '.jpg')
 
 for x in photos[0]:

@@ -15,7 +15,8 @@ class Application(tk.Frame):
     root.title('Pi-cture Frame')
     tk.Frame.__init__(self, root)
     self.grid()
-    pilim = Image.open("/tmp/pi-cture-frame/23622236440.jpg")
+    img = "23289806914"
+    pilim = Image.open("/tmp/pi-cture-frame/%s.jpg" % img).rotate(0)
     pilim.thumbnail((1024,800))
     im = ImageTk.PhotoImage(pilim)
     panel = tk.Label(root, image = im)
