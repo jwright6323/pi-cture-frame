@@ -77,10 +77,8 @@ class PhotoDB:
     #cur.execute("SELECT id,path,date_uploaded FROM photos;")
     cur.execute("SELECT count(*) FROM photos;")
     length = cur.fetchone()[0]
-    cur.execute("SELECT path FROM photos WHERE id=?;",(random.randint(1,length),))
-    return cur.fetchone()[0]
-
-
+    cur.execute("SELECT path,rotation FROM photos WHERE id=?;",(random.randint(1,length),))
+    return cur.fetchone()
 
 
 class Photo:
