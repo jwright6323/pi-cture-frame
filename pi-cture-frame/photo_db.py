@@ -69,8 +69,11 @@ class PhotoDB:
 
   def get_random_photo(self):
     # Here's where we determine the probability for displaying a given photo
-    # Returns a tuple containing a photo and a duration
-    None
+    # Returns a tuple containing a photo path and a duration
+    cur = self.conn.cursor()
+    cur.execute("SELECT id,path,date_uploaded FROM photos;")
+    print cur.fetchone()
+    
 
 
 class Photo:
@@ -88,5 +91,5 @@ class Photo:
     self.date_uploaded = fa['dateupload'] # note the bug in the Flickr API
 
 
-if __name__=="__main__"
+if __name__=="__main__":
   PhotoDB().update_database()
