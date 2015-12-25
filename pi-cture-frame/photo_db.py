@@ -79,7 +79,7 @@ class PhotoDB:
     cur = self.conn.cursor()
     # When applying weights use this, but for now just have equal weights
     #cur.execute("SELECT id,path,date_uploaded FROM photos;")
-    cur.execute("SELECT count(*) FROM photos;")
+    cur.execute("SELECT max(id) FROM photos;")
     self.conn.commit()
     length = cur.fetchone()[0]
     x = None
