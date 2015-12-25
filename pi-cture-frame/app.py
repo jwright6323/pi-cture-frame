@@ -21,19 +21,7 @@ class Application(tk.Frame):
     self.root.configure(cursor="none")
 
     # Create the first picture
-    photo = self.db.get_random_photo()
-    pilim = Image.open(photo.path)
-    if photo.rotation is not 0:
-      pilim = pilim.rotate(-1*photo.rotation)
-
-    # Crop the image and resize
-    scale = float(self.w)/float(photo.width)
-    if(photo.rotation in (90,270,-90,-270)):
-      scale = float(self.h)/float(photo.height)
-
-    pilim = pilim.resize((int(round(photo.width*scale)),int(round(photo.height*scale))), Image.ANTIALIAS)
-    if(photo.rotation not in (90,270,-90,-270)):
-      pilim = pilim.crop((0,0,self.w,self.h))
+    pilim = self.create_photo()
 
     # Convert to Tk
     im = ImageTk.PhotoImage(pilim)
@@ -52,21 +40,30 @@ class Application(tk.Frame):
     tk.Frame.__init__(self, self.root)
     self.grid()
 
-  def update_picture(self):
-    # Get the next picture
+  def create_photo(self):
     photo = self.db.get_random_photo()
     pilim = Image.open(photo.path)
     if photo.rotation is not 0:
       pilim = pilim.rotate(-1*photo.rotation)
 
-    # Crop the image and resize
+    # resize the image
     scale = float(self.w)/float(photo.width)
     if(photo.rotation in (90,270,-90,-270)):
       scale = float(self.h)/float(photo.height)
 
-    pilim = pilim.resize((int(round(photo.width*scale)),int(round(photo.height*scale))), Image.ANTIALIAS)
+    # crop the image (if landscape)
+    new_w = int(round(photo.width*scale))
+    new_h = int(round(photo.height*scale))
+    pilim = pilim.resize((new_w,new_h), Image.ANTIALIAS)
     if(photo.rotation not in (90,270,-90,-270)):
-      pilim = pilim.crop((0,0,self.w,self.h))
+      v_margin = (new_h-self.h)/2
+      pilim = pilim.crop((0,v_margin,self.w,v_margin+self.h))
+
+    return pilim
+
+  def update_picture(self):
+    # Get the next picture
+    pilim = self.create_photo()
 
     # Convert to Tk
     im = ImageTk.PhotoImage(pilim)
