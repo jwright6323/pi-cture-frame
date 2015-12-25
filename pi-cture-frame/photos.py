@@ -12,7 +12,10 @@ user_id = '138731132@N05'
 
 flickr = flickrapi.FlickrAPI(api_key, api_secret)
 
-photos = flickr.photos.search(user_id=user_id)
+photos = flickr.people.getPhotos(user_id=user_id, extras="url_o,date_taken,date_upload,original_format")
+for x in photos[0]:
+  print x.attrib
+exit()
 
 PHOTO_DIR = '/tmp/pi-cture-frame/'
 
@@ -25,7 +28,7 @@ except OSError as e:
 
 def get_photo(attrs):
   print attrs
-  urllib.urlretrieve('http://farm%(farm)s.staticflickr.com/%(server)s/%(id)s_%(originalsecret)s_o.jpg' % attrs,filename=PHOTO_DIR + '/' + attrs['id'] + '.jpg')
+  #urllib.urlretrieve('http://farm%(farm)s.staticflickr.com/%(server)s/%(id)s_%(originalsecret)s_o.jpg' % attrs,filename=PHOTO_DIR + '/' + attrs['id'] + '.jpg')
 
 for x in photos[0]:
-  get_photo(flickr.photos.getInfo(photo_id=x.attrib['id'])[0].attrib)
+  get_photo(flickr.photos.getInfo(photo_id=x.attrib['id'])[0].attrib )
