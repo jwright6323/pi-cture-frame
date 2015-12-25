@@ -6,6 +6,7 @@ import flickrapi
 import urllib
 import os
 import errno
+import random
 
 class PhotoDB:
 
@@ -34,14 +35,15 @@ class PhotoDB:
     if cur.fetchone() is None:
       cur.execute('''CREATE TABLE photos
                      (id INTEGER PRIMARY KEY AUTOINCREMENT, flickr_id INTEGER,fmt TEXT, path TEXT,
-                     title TEXT, width INTEGER, height INTEGER, date_taken INTEGER, date_uploaded INTEGER);''')
+                     title TEXT, width INTEGER, height INTEGER, rotation INTEGER, date_taken INTEGER,
+                     date_uploaded INTEGER);''')
       cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS flickr_ids ON photos (flickr_id);")
 
 
   def add_photo(self, photo):
     cur = self.conn.cursor()
-    cur.execute("INSERT INTO photos VALUES (NULL,?,?,?,?,?,?,?,?);",(photo.flickr_id, photo.fmt, photo.path,
-      photo.title, photo.width, photo.height, photo.date_taken, photo.date_uploaded));
+    cur.execute("INSERT INTO photos VALUES (NULL,?,?,?,?,?,?,?,?,?);",(photo.flickr_id, photo.fmt, photo.path,
+      photo.title, photo.width, photo.height, photo.rotation, photo.date_taken, photo.date_uploaded));
     # download the photo from the url
     urllib.urlretrieve(photo.url,filename=photo.path)
     if os.path.isfile(photo.path):
@@ -61,25 +63,30 @@ class PhotoDB:
     return cur.fetchone()
 
   def update_database(self):
-    for x in self.flickr.people.getPhotos(user_id=self.user_id, extras="url_o,date_taken,date_upload,original_format")[0]:
+    for x in self.flickr.people.getPhotos(user_id=self.user_id, extras="url_o,date_taken,date_upload,original_format,rotate")[0]:
       if self.get_photo_by_flickr_id(x.attrib['id']) is None:
+        rot = self.flickr.photos.getInfo(photo_id=x.attrib['id'])[0].attrib['rotation']
         # get new photo
-        self.add_photo(Photo(x.attrib))
+        self.add_photo(Photo(x.attrib, rot))
 
 
   def get_random_photo(self):
     # Here's where we determine the probability for displaying a given photo
-    # Returns a tuple containing a photo path and a duration
     cur = self.conn.cursor()
-    cur.execute("SELECT id,path,date_uploaded FROM photos;")
-    print cur.fetchone()
-    
+    # When applying weights use this, but for now just have equal weights
+    #cur.execute("SELECT id,path,date_uploaded FROM photos;")
+    cur.execute("SELECT count(*) FROM photos;")
+    length = cur.fetchone()[0]
+    cur.execute("SELECT path FROM photos WHERE id=?;",(random.randint(1,length),))
+    return cur.fetchone()[0]
+
+
 
 
 class Photo:
 
   # Constructor from flickr attributes
-  def __init__(self, fa):
+  def __init__(self, fa, rot):
     self.fmt = fa['originalformat']
     self.flickr_id = fa['id']
     self.path = PhotoDB.photo_dir + self.flickr_id + '.' + self.fmt
@@ -89,6 +96,7 @@ class Photo:
     self.height = fa['height_o']
     self.date_taken = fa['datetaken'] # note the bug in the Flickr API
     self.date_uploaded = fa['dateupload'] # note the bug in the Flickr API
+    self.rotation = rot
 
 
 if __name__=="__main__":
