@@ -14,10 +14,7 @@ class PhotoDB:
   user_id = '138731132@N05'
   photo_dir = '/tmp/pi-cture-frame/'
   db = photo_dir + 'photos.db'
-
-  @classmethod
-  def flickr():
-    flickrapi.FlickrAPI(PhotoDB.api_key, PhotoDB.api_secret)
+  flickr = flickrapi.FlickrAPI(api_key, api_secret)
 
   def __init__(self):
     # Open a db connection
@@ -63,6 +60,13 @@ class PhotoDB:
     cur.execute("SELECT * FROM photos WHERE flickr_id=?;",(flickr_id,))
     return cur.fetchone()
 
+  def update_database(self):
+    for x in self.flickr.people.getPhotos(user_id=self.user_id, extras="url_o,date_taken,date_upload,original_format")[0]:
+      if self.get_photo_by_flickr_id(x.attrib['id']) is None:
+        # get new photo
+        self.add_photo(Photo(x.attrib))
+
+
   def get_random_photo(self):
     # Here's where we determine the probability for displaying a given photo
     # Returns a tuple containing a photo and a duration
@@ -73,19 +77,16 @@ class Photo:
 
   # Constructor from flickr attributes
   def __init__(self, fa):
-    self(fa['id'], fa['originalformat'], fa['title'], fa['url_o'], fa['width_o'], fa['height_o'], fa['datetaken'], fa['dateupload'])
+    self.fmt = fa['originalformat']
+    self.flickr_id = fa['id']
+    self.path = PhotoDB.photo_dir + self.flickr_id + '.' + self.fmt
+    self.title = fa['title']
+    self.url = fa['url_o']
+    self.width = fa['width_o']
+    self.height = fa['height_o']
+    self.date_taken = fa['datetaken'] # note the bug in the Flickr API
+    self.date_uploaded = fa['dateupload'] # note the bug in the Flickr API
 
-  # Generic constructor
-  def __init__(self, fid, fmt, title, url, w, h, dt, du):
-    # Do stuff
-    self.fmt = fmt
-    self.flickr_id = fid
-    self.path = PhotoDB.photo_dir + fid + '.' + fmt
-    self.title = title
-    self.url = url
-    self.width = w
-    self.height = h
-    self.date_taken = dt
-    self.date_uploaded = du
 
-PhotoDB()
+if __name__=="__main__"
+  PhotoDB().update_database()
