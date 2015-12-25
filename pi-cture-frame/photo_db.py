@@ -32,12 +32,14 @@ class PhotoDB:
 
     # Does the photos table exist?
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='photos';")
+    self.conn.commit()
     if cur.fetchone() is None:
       cur.execute('''CREATE TABLE photos
                      (id INTEGER PRIMARY KEY AUTOINCREMENT, flickr_id INTEGER,fmt TEXT, path TEXT,
                      title TEXT, width INTEGER, height INTEGER, rotation INTEGER, date_taken INTEGER,
                      date_uploaded INTEGER);''')
       cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS flickr_ids ON photos (flickr_id);")
+      self.conn.commit()
 
 
   def add_photo(self, photo):
@@ -55,11 +57,13 @@ class PhotoDB:
   def get_photo_by_id(self, photo_id):
     cur = self.conn.cursor()
     cur.execute("SELECT * FROM photos WHERE id=?;",(photo_id,))
+    self.conn.commit()
     return Photo.from_db(cur.fetchone())
 
   def get_photo_by_flickr_id(self, flickr_id):
     cur = self.conn.cursor()
     cur.execute("SELECT * FROM photos WHERE flickr_id=?;",(flickr_id,))
+    self.conn.commit()
     return Photo.from_db(cur.fetchone())
 
   def update_database(self):
@@ -76,6 +80,7 @@ class PhotoDB:
     # When applying weights use this, but for now just have equal weights
     #cur.execute("SELECT id,path,date_uploaded FROM photos;")
     cur.execute("SELECT count(*) FROM photos;")
+    self.conn.commit()
     length = cur.fetchone()[0]
     return self.get_photo_by_id(random.randint(1,length))
 
@@ -101,6 +106,8 @@ class Photo:
 
   @staticmethod
   def from_db(db_resp):
+    if db_resp is None:
+      return None
     p = Photo()
     p.flickr_id = db_resp[1]
     p.fmt = db_resp[2]
