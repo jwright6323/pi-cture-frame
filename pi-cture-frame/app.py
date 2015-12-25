@@ -18,21 +18,29 @@ class Application(tk.Frame):
     self.root.overrideredirect(1)
     self.root.geometry("%dx%d+0+0" % (self.w,self.h))
     self.root.title('Pi-cture Frame')
+    self.root.configure(cursor="none")
 
     # Create the first picture
-    path,rot = self.db.get_random_photo()
-    pilim = Image.open(path)
-    if rot is not 0:
-      pilim = pilim.rotate(-1*rot)
+    photo = self.db.get_random_photo()
+    pilim = Image.open(photo.path)
+    if photo.rotation is not 0:
+      pilim = pilim.rotate(-1*photo.rotation)
 
-    # Crop the image and center using thumbnail
-    pilim.thumbnail((self.w,self.h))
+    # Crop the image and resize
+    scale = float(self.w)/float(photo.width)
+    if(photo.rotation in (90,270,-90,-270)):
+      scale = float(self.h)/float(photo.height)
+
+    pilim = pilim.resize((int(round(photo.width*scale)),int(round(photo.height*scale))), Image.ANTIALIAS)
+    if(photo.rotation not in (90,270,-90,-270)):
+      pilim = pilim.crop((0,0,self.w,self.h))
 
     # Convert to Tk
     im = ImageTk.PhotoImage(pilim)
 
     # Add to panel
     self.panel = tk.Label(self.root, image = im)
+    self.panel.configure(background="black")
 
     # Prevent garbage collecting
     self.panel.image = im
@@ -46,13 +54,19 @@ class Application(tk.Frame):
 
   def update_picture(self):
     # Get the next picture
-    path,rot = self.db.get_random_photo()
-    pilim = Image.open(path)
-    if rot is not 0:
-      pilim = pilim.rotate(-1*rot)
+    photo = self.db.get_random_photo()
+    pilim = Image.open(photo.path)
+    if photo.rotation is not 0:
+      pilim = pilim.rotate(-1*photo.rotation)
 
-    # Crop the image and center using thumbnail
-    pilim.thumbnail((self.w,self.h))
+    # Crop the image and resize
+    scale = float(self.w)/float(photo.width)
+    if(photo.rotation in (90,270,-90,-270)):
+      scale = float(self.h)/float(photo.height)
+
+    pilim = pilim.resize((int(round(photo.width*scale)),int(round(photo.height*scale))), Image.ANTIALIAS)
+    if(photo.rotation not in (90,270,-90,-270)):
+      pilim = pilim.crop((0,0,self.w,self.h))
 
     # Convert to Tk
     im = ImageTk.PhotoImage(pilim)

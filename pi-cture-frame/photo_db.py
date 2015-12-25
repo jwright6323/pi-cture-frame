@@ -55,12 +55,12 @@ class PhotoDB:
   def get_photo_by_id(self, photo_id):
     cur = self.conn.cursor()
     cur.execute("SELECT * FROM photos WHERE id=?;",(photo_id,))
-    return cur.fetchone()
+    return Photo.from_db(cur.fetchone())
 
   def get_photo_by_flickr_id(self, flickr_id):
     cur = self.conn.cursor()
     cur.execute("SELECT * FROM photos WHERE flickr_id=?;",(flickr_id,))
-    return cur.fetchone()
+    return Photo.from_db(cur.fetchone())
 
   def update_database(self):
     for x in self.flickr.people.getPhotos(user_id=self.user_id, extras="url_o,date_taken,date_upload,original_format,rotate")[0]:
@@ -77,24 +77,41 @@ class PhotoDB:
     #cur.execute("SELECT id,path,date_uploaded FROM photos;")
     cur.execute("SELECT count(*) FROM photos;")
     length = cur.fetchone()[0]
-    cur.execute("SELECT path,rotation FROM photos WHERE id=?;",(random.randint(1,length),))
-    return cur.fetchone()
+    return self.get_photo_by_id(random.randint(1,length))
 
 
 class Photo:
 
   # Constructor from flickr attributes
-  def __init__(self, fa, rot):
-    self.fmt = fa['originalformat']
-    self.flickr_id = fa['id']
-    self.path = PhotoDB.photo_dir + self.flickr_id + '.' + self.fmt
-    self.title = fa['title']
-    self.url = fa['url_o']
-    self.width = fa['width_o']
-    self.height = fa['height_o']
-    self.date_taken = fa['datetaken'] # note the bug in the Flickr API
-    self.date_uploaded = fa['dateupload'] # note the bug in the Flickr API
-    self.rotation = rot
+  def __init__(self, fa=None, rot=None):
+    if fa is not None:
+      self.fmt = fa['originalformat']
+      self.flickr_id = fa['id']
+      self.path = PhotoDB.photo_dir + self.flickr_id + '.' + self.fmt
+      self.title = fa['title']
+      self.url = fa['url_o']
+      self.width = fa['width_o']
+      self.height = fa['height_o']
+      self.date_taken = fa['datetaken'] # note the bug in the Flickr API
+      self.date_uploaded = fa['dateupload'] # note the bug in the Flickr API
+      if rot is None:
+        self.rotation = 0
+      else:
+        self.rotation = rot
+
+  @staticmethod
+  def from_db(db_resp):
+    p = Photo()
+    p.flickr_id = db_resp[1]
+    p.fmt = db_resp[2]
+    p.path = db_resp[3]
+    p.title = db_resp[4]
+    p.width = db_resp[5]
+    p.height = db_resp[6]
+    p.rotation = db_resp[7]
+    p.date_taken = db_resp[8]
+    p.date_uploaded = db_resp[9]
+    return p
 
 
 if __name__=="__main__":
