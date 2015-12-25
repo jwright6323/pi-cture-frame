@@ -82,7 +82,10 @@ class PhotoDB:
     cur.execute("SELECT count(*) FROM photos;")
     self.conn.commit()
     length = cur.fetchone()[0]
-    return self.get_photo_by_id(random.randint(1,length))
+    x = None
+    while x is None:
+      x = self.get_photo_by_id(random.randint(1,length))
+    return x
 
 
 class Photo:
