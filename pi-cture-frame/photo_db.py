@@ -13,7 +13,7 @@ class PhotoDB:
   api_key = u'e9495a30dea5740bb1da96c1aa60e954'
   api_secret = u'bde6f9256b82f199'
   user_id = '138731132@N05'
-  photo_dir = '/tmp/pi-cture-frame/'
+  photo_dir = '/home/pi/pi-cture-frame/photos/'
   db = photo_dir + 'photos.db'
   flickr = flickrapi.FlickrAPI(api_key, api_secret)
 
