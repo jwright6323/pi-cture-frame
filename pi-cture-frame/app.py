@@ -8,7 +8,7 @@ from photo_db import *
 
 class Application(tk.Frame):
 
-  picture_delay_s = 15
+  picture_delay_s = 10
   db = PhotoDB()
 
   def __init__(self):
