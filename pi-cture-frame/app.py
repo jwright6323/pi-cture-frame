@@ -34,11 +34,11 @@ class Application(tk.Frame):
     self.panel.image = im
 
     # Fullscreen
-    self.panel.pack(side = "bottom", fill="both", expand="yes")
 
     # Initialize
     tk.Frame.__init__(self, self.root)
     self.grid()
+    self.panel.grid(column=0, row=0, sticky='NSEW')
 
   def create_photo(self):
     photo = self.db.get_random_photo()
