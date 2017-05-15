@@ -19,6 +19,11 @@ class Application(tk.Frame):
     self.root.geometry("%dx%d+0+0" % (self.w,self.h))
     self.root.title('Pi-cture Frame')
     self.root.configure(cursor="none")
+    self.root.configure(background="black")
+    self.root.grid_rowconfigure(0, weight=1)
+    self.root.grid_rowconfigure(2, weight=1)
+    self.root.grid_columnconfigure(0, weight=1)
+    self.root.grid_columnconfigure(2, weight=1)
 
     # Create the first picture
     pilim = self.create_photo()
@@ -37,9 +42,9 @@ class Application(tk.Frame):
 
     # Initialize
     tk.Frame.__init__(self, self.root)
+    self.panel.grid(column=1, row=1)
     self.grid()
-    self.panel.grid(column=0, row=0, sticky='NSEW')
-
+ 
   def create_photo(self):
     photo = self.db.get_random_photo()
     pilim = Image.open(photo.path)
@@ -48,12 +53,14 @@ class Application(tk.Frame):
 
     # resize the image
     scale = float(self.w)/float(photo.width)
-    if(photo.rotation in (90,270,-90,-270)):
-      scale = float(self.h)/float(photo.height)
-
-    # crop the image (if landscape)
     new_w = int(round(photo.width*scale))
     new_h = int(round(photo.height*scale))
+    if(photo.rotation in (90,270,-90,-270)):
+      scale = float(self.h)/float(photo.width)
+      new_h = int(round(photo.width*scale))
+      new_w = int(round(photo.height*scale))
+
+    # crop the image (if landscape)
     pilim = pilim.resize((new_w,new_h), Image.ANTIALIAS)
     if(photo.rotation not in (90,270,-90,-270)):
       v_margin = (new_h-self.h)/2
